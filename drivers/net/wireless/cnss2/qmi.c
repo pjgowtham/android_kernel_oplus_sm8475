@@ -7,6 +7,11 @@
 #include <linux/module.h>
 #include <linux/soc/qcom/qmi.h>
 
+#ifdef OPLUS_FEATURE_WIFI_BDF
+//Modify for: multi projects using different bdf
+#include <soc/oplus/system/oplus_project.h>
+#endif /* OPLUS_FEATURE_WIFI_BDF */
+
 #include "bus.h"
 #include "debug.h"
 #include "main.h"
@@ -27,6 +32,28 @@
 #define REGDB_FILE_NAME			"regdb.bin"
 #define HDS_FILE_NAME			"hds.bin"
 #define CHIP_ID_GF_MASK			0x10
+
+#ifdef OPLUS_FEATURE_WIFI_BDF
+//Modify for: multi projects using different bdf
+#define BDF_FILE_CHN_IN		"bdwlan.b0c"
+#define BDF_FILE_EU		"bdwlan.b0e"
+#define BDF_FILE_NA		"bdwlan.b0a"
+#define BDF_FILE_CHN_IN_GF	"bdwlang.b0c"
+#define BDF_FILE_EU_GF		"bdwlang.b0e"
+#define BDF_FILE_NA_GF		"bdwlang.b0a"
+#define REG_ID_CHN_IN		1
+#define REG_ID_EU		2
+#define REG_ID_NA		3
+//add for second resources
+#define RESCOUSE_FIRST   1
+#define RESCOUSE_SECOND  2
+#define RESCOUSE_THIRD   3
+#define RESCOUSE_FOURTH  4
+#define ELF_BDF_FILE_NAME_SEC         "bdwlansec.elf"
+#define ELF_BDF_FILE_NAME_GF_SEC      "bdwlangsec.elf"
+#define ELF_BDF_FILE_NAME_SEC_SAR     "bdwlansecsar.elf"
+#define ELF_BDF_FILE_NAME_GF_SEC_SAR  "bdwlangsecsar.elf"
+#endif /* OPLUS_FEATURE_WIFI_BDF */
 
 #define CONN_ROAM_FILE_NAME		"wlan-connection-roaming"
 #define INI_EXT			".ini"
@@ -64,8 +91,17 @@ void cnss_ignore_qmi_failure(bool ignore)
 	ignore_qmi_failure = ignore;
 }
 #else
+#ifdef OPLUS_FEATURE_WIFI_BDF
+static bool ignore_qmi_failure;
+#define CNSS_QMI_ASSERT() CNSS_ASSERT(ignore_qmi_failure)
+void cnss_ignore_qmi_failure(bool ignore)
+{
+	ignore_qmi_failure = ignore;
+}
+#else
 #define CNSS_QMI_ASSERT() do { } while (0)
 void cnss_ignore_qmi_failure(bool ignore) { }
+#endif /* OPLUS_FEATURE_WIFI_BDF */
 #endif
 
 static char *cnss_qmi_mode_to_str(enum cnss_driver_mode mode)
@@ -608,6 +644,86 @@ static char *cnss_bdf_type_to_str(enum cnss_bdf_type bdf_type)
 	}
 }
 
+#ifdef OPLUS_FEATURE_WIFI_BDF
+//Modify for: multi projects using different bdf
+static bool is_prj_support_region_id() {
+        int project_id = get_project();
+        cnss_pr_dbg("project: %d\n", project_id);
+        if (project_id == 20846 || project_id == 20847 || project_id == 133194
+            || project_id == 21841 || project_id == 21842) {
+                return true;
+        }
+        return false;
+}
+
+static bool is_udon_internal_prj_need_second_rescouse() {
+        int project_id = get_project();
+        cnss_pr_dbg("project: %d\n", project_id);
+        if (project_id == 22803) {
+                return true;
+        }
+        return false;
+}
+
+static bool is_udon_export_prj_need_second_rescouse() {
+        int project_id = get_project();
+        cnss_pr_dbg("project: %d\n", project_id);
+        if (project_id == 22881) {
+                return true;
+        }
+        return false;
+}
+
+static void cnss_get_oplus_bdf_file_name(struct cnss_plat_data *plat_priv, char* file_name, u32 filename_len) {
+	int reg_id = get_Operator_Version();
+	cnss_pr_dbg("region id: %d", reg_id);
+
+	if (plat_priv->chip_info.chip_id & CHIP_ID_GF_MASK) {
+		if (is_prj_support_region_id()) {
+			if (reg_id == REG_ID_CHN_IN) {
+				snprintf(file_name, filename_len, BDF_FILE_CHN_IN_GF);
+			} else if (reg_id == REG_ID_EU) {
+				snprintf(file_name, filename_len, BDF_FILE_EU_GF);
+			} else if (reg_id == REG_ID_NA) {
+				snprintf(file_name, filename_len, BDF_FILE_NA_GF);
+			} else {
+				snprintf(file_name, filename_len, ELF_BDF_FILE_NAME_GF);
+			}
+		} else if ((is_udon_internal_prj_need_second_rescouse() && RESCOUSE_SECOND == get_Modem_Version())
+			        || (is_udon_export_prj_need_second_rescouse() && RESCOUSE_THIRD == get_Modem_Version())) {
+			cnss_pr_dbg("RF id: %d", get_Modem_Version());
+			snprintf(file_name, filename_len, ELF_BDF_FILE_NAME_GF_SEC);
+		} else if (is_udon_internal_prj_need_second_rescouse() && RESCOUSE_FOURTH == get_Modem_Version()) {
+			cnss_pr_dbg("RF id: %d", get_Modem_Version());
+			snprintf(file_name, filename_len, ELF_BDF_FILE_NAME_GF_SEC_SAR);
+		} else {
+			snprintf(file_name, filename_len, ELF_BDF_FILE_NAME_GF);
+		}
+	} else {
+		if (is_prj_support_region_id()) {
+			if (reg_id == REG_ID_CHN_IN) {
+				snprintf(file_name, filename_len, BDF_FILE_CHN_IN);
+			} else if (reg_id == REG_ID_EU) {
+				snprintf(file_name, filename_len, BDF_FILE_EU);
+			} else if (reg_id == REG_ID_NA) {
+				snprintf(file_name, filename_len, BDF_FILE_NA);
+			} else {
+				snprintf(file_name, filename_len, ELF_BDF_FILE_NAME);
+			}
+		} else if ((is_udon_internal_prj_need_second_rescouse() && RESCOUSE_SECOND == get_Modem_Version())
+			        || (is_udon_export_prj_need_second_rescouse() && RESCOUSE_THIRD == get_Modem_Version())) {
+			cnss_pr_dbg("RF id: %d", get_Modem_Version());
+			snprintf(file_name, filename_len, ELF_BDF_FILE_NAME_SEC);
+		} else if (is_udon_internal_prj_need_second_rescouse() && RESCOUSE_FOURTH == get_Modem_Version()) {
+			cnss_pr_dbg("RF id: %d", get_Modem_Version());
+			snprintf(file_name, filename_len, ELF_BDF_FILE_NAME_SEC_SAR);
+		} else {
+			snprintf(file_name, filename_len, ELF_BDF_FILE_NAME);
+		}
+	}
+}
+#endif /* OPLUS_FEATURE_WIFI_BDF */
+
 static int cnss_get_bdf_file_name(struct cnss_plat_data *plat_priv,
 				  u32 bdf_type, char *filename,
 				  u32 filename_len)
@@ -619,12 +735,17 @@ static int cnss_get_bdf_file_name(struct cnss_plat_data *plat_priv,
 	case CNSS_BDF_ELF:
 		/* Board ID will be equal or less than 0xFF in GF mask case */
 		if (plat_priv->board_info.board_id == 0xFF) {
+#ifndef OPLUS_FEATURE_WIFI_BDF
+//Modify for: multi projects using different bdf
 			if (plat_priv->chip_info.chip_id & CHIP_ID_GF_MASK)
 				snprintf(filename_tmp, filename_len,
 					 ELF_BDF_FILE_NAME_GF);
 			else
 				snprintf(filename_tmp, filename_len,
 					 ELF_BDF_FILE_NAME);
+#else
+			cnss_get_oplus_bdf_file_name(plat_priv, filename_tmp, filename_len);
+#endif /* OPLUS_FEATURE_WIFI_BDF */
 		} else if (plat_priv->board_info.board_id < 0xFF) {
 			if (plat_priv->chip_info.chip_id & CHIP_ID_GF_MASK)
 				snprintf(filename_tmp, filename_len,
