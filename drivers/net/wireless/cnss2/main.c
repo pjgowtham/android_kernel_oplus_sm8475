@@ -20,6 +20,11 @@
 #include <soc/qcom/minidump.h>
 #endif
 
+#ifdef OPLUS_FEATURE_WIFI_MAC
+//Add for boot wlan mode not use NV mac
+#include <soc/oplus/system/boot_mode.h>
+#endif /* OPLUS_FEATURE_WIFI_MAC */
+
 #include "cnss_plat_ipc_qmi.h"
 #include "main.h"
 #include "bus.h"
@@ -617,7 +622,12 @@ static int cnss_setup_dms_mac(struct cnss_plat_data *plat_priv)
 	/* DTSI property use-nv-mac is used to force DMS MAC address for WLAN.
 	 * Thus assert on failure to get MAC from DMS even after retries
 	 */
+#ifndef OPLUS_FEATURE_WIFI_MAC
+//Add for boot wlan mode not use NV mac
 	if (plat_priv->use_nv_mac) {
+#else
+	if ((get_boot_mode() !=  MSM_BOOT_MODE__WLAN) && plat_priv->use_nv_mac) {
+#endif /* OPLUS_FEATURE_WIFI_MAC */
 		/* Check if Daemon says platform support DMS MAC provisioning */
 		cfg = cnss_plat_ipc_qmi_daemon_config();
 		if (cfg) {
@@ -638,7 +648,9 @@ static int cnss_setup_dms_mac(struct cnss_plat_data *plat_priv)
 		}
 		if (!plat_priv->dms.mac_valid) {
 			cnss_pr_err("Unable to get MAC from DMS after retries\n");
+			#ifndef OPLUS_FEATURE_WIFI_MAC
 			CNSS_ASSERT(0);
+                        #endif /* OPLUS_FEATURE_WIFI_MAC */
 			return -EINVAL;
 		}
 	}
