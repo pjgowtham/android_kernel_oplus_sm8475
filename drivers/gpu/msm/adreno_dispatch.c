@@ -992,6 +992,7 @@ static inline void _decrement_submit_now(struct kgsl_device *device)
  *
  * Lock the dispatcher and call _adreno_dispatcher_issueibcmds
  */
+#ifndef OPLUS_FEATURE_DISPLAY
 static void adreno_dispatcher_issuecmds(struct adreno_device *adreno_dev)
 {
 	struct adreno_dispatcher *dispatcher = &adreno_dev->dispatcher;
@@ -1023,6 +1024,7 @@ static void adreno_dispatcher_issuecmds(struct adreno_device *adreno_dev)
 done:
 	adreno_dispatcher_schedule(device);
 }
+#endif /* OPLUS_FEATURE_DISPLAY */
 
 /**
  * get_timestamp() - Return the next timestamp for the context
@@ -1434,7 +1436,11 @@ static int adreno_dispatcher_queue_cmds(struct kgsl_device_private *dev_priv,
 	 */
 
 	if (dispatch_q->inflight < _context_drawobj_burst)
+#ifdef OPLUS_FEATURE_DISPLAY
+		adreno_dispatcher_schedule(&(adreno_dev->dev));
+#else
 		adreno_dispatcher_issuecmds(adreno_dev);
+#endif /*OPLUS_FEATURE_DISPLAY*/
 done:
 	if (test_and_clear_bit(ADRENO_CONTEXT_FAULT, &context->priv))
 		return -EPROTO;
