@@ -6754,7 +6754,7 @@ static int oplus_usbtemp_monitor_main_new_method(void *data)
 	struct timespec curr_range_change_first_time;
 	struct timespec curr_range_change_last_time;
 	bool usbtemp_first_time_in_curr_range = false;
-	static current_read_count = 0;
+	static int current_read_count = 0;
 
 	/* add for variables init */
 	curr_range_change_first_time.tv_sec = 0;
@@ -7731,7 +7731,7 @@ int oplus_get_charger_cycle(void)
 	return cycle_count;
 }
 
-int oplus_adsp_voocphy_get_enable()
+int oplus_adsp_voocphy_get_enable(void)
 {
 	int rc = 0;
 	struct battery_chg_dev *bcdev = NULL;

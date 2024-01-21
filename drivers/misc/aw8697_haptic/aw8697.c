@@ -6974,7 +6974,7 @@ static void haptic_clean_buf(struct aw8697 *aw8697, int status)
     }
 }
 
-static inline unsigned long int aw8697_get_sys_msecs()
+static inline unsigned long int aw8697_get_sys_msecs(void)
 {
 	ktime_t get_time;
 	unsigned long int get_time_ms;
