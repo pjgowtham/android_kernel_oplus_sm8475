@@ -89,8 +89,8 @@
 #define MAX_VMAX_MV				11000
 #define MAX_HV_VMAX_MV				10000
 #define MAX_MV_VMAX_MV				6000
-#define CLAMPED_VMAX_MV				5000
-#define DEFAULT_VMAX_MV				5000
+#define CLAMPED_VMAX_MV				2000
+#define DEFAULT_VMAX_MV				1680
 
 #define HAP_CFG_DRV_WF_SEL_REG			0x49
 #define DRV_WF_FMT_BIT				BIT(4)
