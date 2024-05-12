@@ -3029,7 +3029,7 @@ static int battery_psy_get_prop(struct power_supply *psy,
 		}
 		break;
 	case POWER_SUPPLY_PROP_TECHNOLOGY:
-		pval->intval = chip->vooc_project;
+		pval->intval = POWER_SUPPLY_TECHNOLOGY_LION;
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
 		pval->intval = chip->batt_rm * 1000;
