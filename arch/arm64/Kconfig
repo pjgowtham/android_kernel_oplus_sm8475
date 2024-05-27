@@ -2121,6 +2121,46 @@ config BUILD_ARM64_DT_OVERLAY
 	  Enabling this option sets required flags to add DT
 	  overlay in the compilation.
 
+# Oplus configuration options
+menu "Oplus configuration options"
+
+config OPLUS_DEVICE_DTBS
+	depends on ARCH_QCOM
+	default n
+	bool "Oplus device DTBs"
+	help
+	  Only include Oplus device specific DTBs to limit the number that
+	  get built during kernel compilation.
+
+config FERRARI_DTB
+	select OPLUS_DEVICE_DTBS
+	default n
+	bool "Oplus ferrari device DTB"
+	help
+	  Only include Oplus ferrari device specific device tree.
+
+config OVALTINE_DTB
+	select OPLUS_DEVICE_DTBS
+	default n
+	bool "Oplus ovaltine device DTB"
+	help
+	  Only include Oplus ovaltine device specific device tree.
+
+config UDON_DTB
+	select OPLUS_DEVICE_DTBS
+	default n
+	bool "Oplus udon device DTB"
+	help
+	  Only include Oplus udon device specific device tree.
+
+config WLY_DTB
+	select OPLUS_DEVICE_DTBS
+	default n
+	bool "Oplus wly device DTB"
+	help
+	  Only include Oplus wly device specific device tree.
+endmenu
+
 config SYSVIPC_COMPAT
 	def_bool y
 	depends on COMPAT && SYSVIPC
