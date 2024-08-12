@@ -8476,7 +8476,7 @@ int sm8450_get_ccdetect_online(void)
 	} else {
 		online = oplus_get_otg_online_with_switch_scheme();
 	}
-	chg_err("online:%d!\n", online);
+	//chg_err("online:%d!\n", online);
 	return online;
 }
 
