@@ -19,7 +19,7 @@
 #include <linux/param.h>
 #include <linux/proc_fs.h>
 #include <linux/time.h>
-#ifdef CONFIG_DRM_MSM
+#if IS_ENABLED(CONFIG_DRM_MSM) || IS_ENABLED(CONFIG_DRM_OPLUS_NOTIFY)
 #include <linux/msm_drm_notify.h>
 #endif
 
