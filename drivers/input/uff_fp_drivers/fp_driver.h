@@ -60,7 +60,7 @@ extern void mt_spi_disable_master_clk(struct spi_device *spidev);
 #define fp_spi_disable_master_clk(pdriver) (void)(pdriver);
 #endif
 
-#if defined(CONFIG_DRM_MSM)
+#if IS_ENABLED(CONFIG_DRM_MSM) || IS_ENABLED(CONFIG_DRM_OPLUS_NOTIFY)
 #include <linux/msm_drm_notify.h>
 #define oplus_register_notifier_client(pnotifier) msm_drm_register_client(pnotifier);  // inbit
 #elif defined(CONFIG_FB)

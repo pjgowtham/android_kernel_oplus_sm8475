@@ -1010,7 +1010,7 @@ static struct file_operations sensor_list_fops = {
 #endif
 
 //#ifdef CONFIG_FB
-#if defined(CONFIG_DRM_MSM)
+#if IS_ENABLED(CONFIG_DRM_MSM) || IS_ENABLED(CONFIG_DRM_OPLUS_NOTIFY)
 static int sensor_fb_notifier(struct notifier_block *nb,
 	unsigned long event, void *data)
 {
@@ -1107,7 +1107,7 @@ void ssc_fb_set_screen_status(int status)
 	return;
 }
 EXPORT_SYMBOL(ssc_fb_set_screen_status);
-#endif /* CONFIG_DRM_MSM */
+#endif
 //#endif /* CONFIG_FB */
 
 

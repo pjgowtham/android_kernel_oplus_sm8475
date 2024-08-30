@@ -925,7 +925,7 @@ static int fp_probe(oplus_fp_device *pdev) {
 
 #if defined(CONFIG_DRM_MEDIATEK_V2)
     status = oplus_register_notifier_client("fingerprint", &fp_dev->notifier);
-#elif defined(CONFIG_DRM_MSM) || defined(CONFIG_FB)
+#elif IS_ENABLED(CONFIG_DRM_MSM) || IS_ENABLED(CONFIG_DRM_OPLUS_NOTIFY) || IS_ENABLED(CONFIG_FB)
     status = oplus_register_notifier_client(&fp_dev->notifier);
 #endif
 
